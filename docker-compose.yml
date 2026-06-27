@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  web:
+    image: ammaramara/amma-dotnet-app:v3
+    ports:
+     - "8080:8080"
+    depends_on:
+     - db
+     - cache
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "AmmarStrong@Password123"
+    ports:
+     - "1433:1433"
+    volumes:
+     - mssql-data:/var/opt/mssql
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - db
+    volumes:
+      - ./init.sql:/init.sql
+    command: /bin/bash -c "sleep 15 && /opt/mssql-tools/bin/sqlcmd -S db -U sa -P 'AmmarStrong@Password123' -i /init.sql -C"
+  cache:
+    image: redis:alpine
+    ports:
+     - "6379:6379"
+volumes:
+  mssql-data:
